@@ -1,0 +1,68 @@
+<!doctype html>
+<html>
+<head>
+  <title>Context Engineering RAG Assistant</title>
+  <style>
+    body { font-family: monospace; max-width: 900px; margin: 30px auto; background:#0e0e0e; color:#eee; }
+    h1 { text-align:center; border-bottom: 2px solid #444; padding-bottom: 10px; }
+    textarea, input[type=text] { width: 100%; box-sizing: border-box; background:#1a1a1a; color:#eee; border:1px solid #444; padding:8px; }
+    button { background:#2a6; color:#fff; border:none; padding:8px 16px; cursor:pointer; margin-top:8px; }
+    .turn { border:1px solid #333; margin:16px 0; padding:12px; background:#151515; }
+    .label { color:#8cf; font-weight:bold; }
+    .chunk { border-left: 3px solid #555; padding-left:8px; margin:6px 0; color:#ccc; font-size:0.9em; }
+    .meta { color:#888; font-size:0.8em; }
+    .answer { color:#efe; white-space: pre-wrap; }
+    .topnav { text-align:right; margin-bottom:10px; }
+    .topnav a { color:#8cf; margin-left:12px; }
+    .error { color:#f66; }
+  </style>
+</head>
+<body>
+  <div class="topnav">
+    <a href="/config">Retrieval &amp; Prompt Config</a>
+    <form method="post" action="/reset" style="display:inline;">
+      <button type="submit" style="background:#555;">Reset Conversation</button>
+    </form>
+  </div>
+  <h1>==== Context Engineering RAG Assistant ====</h1>
+
+  <form method="post" action="/query">
+    <label>Enter your question:</label>
+    <textarea name="query" rows="2" required></textarea>
+    <button type="submit">Submit</button>
+  </form>
+
+  {% for turn in history|reverse %}
+  <div class="turn">
+    <div class="label">Query:</div> {{ turn.query }}
+    <div class="meta">session: {{ turn.session_id }} | latency: {{ turn.latency_ms }}ms | mcp_used: {{ turn.mcp_used }}</div>
+
+    <hr>
+    <div class="label">Retrieved Context</div>
+    {% if turn.citations %}
+      {% for c in turn.citations %}
+      <div class="chunk">
+        <div class="meta">source: {{ c.source }} (status: {{ c.status }}) {% if c.score %}| score: {{ '%.3f'|format(c.score) }}{% endif %}</div>
+        {{ c.content }}
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="meta">(no citations returned)</div>
+    {% endif %}
+
+    {% if turn.mcp_result %}
+    <div class="label">MCP Tool Output</div>
+    <div class="chunk"><pre>{{ turn.mcp_result }}</pre></div>
+    {% endif %}
+
+    <hr>
+    <div class="label">Generated Response</div>
+    {% if turn.error %}
+      <div class="error">Error: {{ turn.error }}</div>
+    {% else %}
+      <div class="answer">{{ turn.answer }}</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</body>
+</html>

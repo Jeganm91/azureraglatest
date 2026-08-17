@@ -1,0 +1,8 @@
+{
+  "policy_name": "System Access Policy",
+  "version": "2.1",
+  "effective_date": "2026-01-10",
+  "summary": "Privileged access requires manager approval plus Security Officer sign-off. Standard access requires manager approval only. Privileged access is time-boxed to 90 days by default.",
+  "last_reviewed_by": "IT Security Team",
+  "source_system": "Policy Management System (live feed, external to the Bedrock Knowledge Base)"
+}
